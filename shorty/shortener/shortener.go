@@ -79,5 +79,6 @@ func GetLongUrl(w http.ResponseWriter, req *http.Request) {
 			break
 		}
 	}
-	http.Redirect(w, req, longUrl, http.StatusPermanentRedirect)
+	finalUrl := fmt.Sprintf("http://%s", longUrl)
+	http.Redirect(w, req, finalUrl, http.StatusSeeOther)
 }
