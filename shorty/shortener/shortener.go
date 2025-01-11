@@ -37,8 +37,13 @@ func GetShortUrl(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	urlWithoutScheme := strings.Split(url.String(), "://")
+	if len(urlWithoutScheme) == 1 {
+		http.Error(w, "Invalid Url format", http.StatusBadRequest)
+		return
+	}
 	query := make([]string, 0)
-	query = append(query, url.String())
+	query = append(query, urlWithoutScheme[1])
 
 	hasher := md5.New()
 	hasher.Write([]byte(strings.Join(query, "")))
@@ -48,7 +53,7 @@ func GetShortUrl(w http.ResponseWriter, req *http.Request) {
 	urlResponse := &UrlShortnerResponse{
 		ShortUrl: fmt.Sprintf(`http://localhost:8090/l?q=%s`, shortUrl),
 	}
-	UrlMap[shortUrl] = url.String()
+	UrlMap[shortUrl] = urlWithoutScheme[1]
 	responseByte, _ := json.Marshal(urlResponse)
 
 	fmt.Fprintf(w, string(responseByte))
@@ -79,6 +84,6 @@ func GetLongUrl(w http.ResponseWriter, req *http.Request) {
 			break
 		}
 	}
-	finalUrl := fmt.Sprintf("http://%s", longUrl)
+	finalUrl := fmt.Sprintf("https://%s", longUrl)
 	http.Redirect(w, req, finalUrl, http.StatusSeeOther)
 }
